@@ -44,15 +44,6 @@ A redução cai de 15× para 4× e o conteúdo fica legível. A aplicação supo
 | CLI (prévia, benchmark, simulação, diagnóstico) | pronto, em uso |
 | 124 testes em C# + 28 no firmware | passando |
 
-> **Ressalva honesta:** o projeto foi desenvolvido em Linux. Tudo foi compilado e
-> testado lá, **exceto o projeto WPF** (`OledMirror.App`), que o SDK do .NET não
-> consegue compilar fora do Windows. Por isso toda a lógica da interface foi posta
-> na `MainViewModel`, que **não depende de WPF e compila e é verificada**; o
-> projeto WPF ficou reduzido a XAML e ~60 linhas de código de janela. Ainda assim,
-> **espere ter que corrigir algum detalhe de XAML na primeira compilação em
-> Windows.** Nenhuma outra parte do sistema depende disso — o CLI faz tudo o que
-> a interface faz.
-
 ## Comece por aqui
 
 ### Sem hardware nenhum
