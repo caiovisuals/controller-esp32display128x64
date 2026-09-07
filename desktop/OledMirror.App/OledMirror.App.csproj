@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+        <TargetFramework>net8.0-windows</TargetFramework>
+        <UseWPF>true</UseWPF>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <LangVersion>latest</LangVersion>
+        <RootNamespace>OledMirror.App</RootNamespace>
+        <AssemblyName>OledMirror</AssemblyName>
+        <ApplicationManifest>app.manifest</ApplicationManifest>
+        <SupportedOSPlatformVersion>7.0</SupportedOSPlatformVersion>
+    </PropertyGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\OledMirror.Core\OledMirror.Core.csproj" />
+        <ProjectReference Include="..\OledMirror.Windows\OledMirror.Windows.csproj" />
+    </ItemGroup>
+</Project>

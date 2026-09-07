@@ -1,0 +1,45 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OledMirror.Core", "OledMirror.Core\OledMirror.Core.csproj", "{DC131391-48BB-43D5-B2AE-E32E4B8E3D28}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OledMirror.Windows", "OledMirror.Windows\OledMirror.Windows.csproj", "{FFD924DC-9911-494E-9A31-6B6B742F75E7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OledMirror.Cli", "OledMirror.Cli\OledMirror.Cli.csproj", "{3D37FF16-D679-43B0-AE58-90613A0A05D1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OledMirror.Tests", "OledMirror.Tests\OledMirror.Tests.csproj", "{2B613563-2F8D-4839-A1DE-5488F1FC1C6C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OledMirror.App", "OledMirror.App\OledMirror.App.csproj", "{7A1E9C64-2F5B-4D3A-9E8C-1B2D4F6A8C05}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DC131391-48BB-43D5-B2AE-E32E4B8E3D28}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DC131391-48BB-43D5-B2AE-E32E4B8E3D28}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DC131391-48BB-43D5-B2AE-E32E4B8E3D28}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DC131391-48BB-43D5-B2AE-E32E4B8E3D28}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FFD924DC-9911-494E-9A31-6B6B742F75E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FFD924DC-9911-494E-9A31-6B6B742F75E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FFD924DC-9911-494E-9A31-6B6B742F75E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FFD924DC-9911-494E-9A31-6B6B742F75E7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3D37FF16-D679-43B0-AE58-90613A0A05D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3D37FF16-D679-43B0-AE58-90613A0A05D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3D37FF16-D679-43B0-AE58-90613A0A05D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3D37FF16-D679-43B0-AE58-90613A0A05D1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2B613563-2F8D-4839-A1DE-5488F1FC1C6C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2B613563-2F8D-4839-A1DE-5488F1FC1C6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2B613563-2F8D-4839-A1DE-5488F1FC1C6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2B613563-2F8D-4839-A1DE-5488F1FC1C6C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7A1E9C64-2F5B-4D3A-9E8C-1B2D4F6A8C05}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7A1E9C64-2F5B-4D3A-9E8C-1B2D4F6A8C05}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7A1E9C64-2F5B-4D3A-9E8C-1B2D4F6A8C05}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7A1E9C64-2F5B-4D3A-9E8C-1B2D4F6A8C05}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,26 @@
+# .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+artifacts/
+
+# PlatformIO
+.pio/
+.pioenvs/
+.piolibdeps/
+.clang_complete
+.gcc-flags.json
+
+# Editores
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# Sistema
+Thumbs.db
+.DS_Store
+
+# Saidas locais
+*.log

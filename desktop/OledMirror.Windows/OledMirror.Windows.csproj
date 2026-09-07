@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>net8.0-windows</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <LangVersion>latest</LangVersion>
+        <RootNamespace>OledMirror.Windows</RootNamespace>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <SupportedOSPlatformVersion>7.0</SupportedOSPlatformVersion>
+    </PropertyGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\OledMirror.Core\OledMirror.Core.csproj" />
+    </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="System.Management" Version="8.0.0" />
+    </ItemGroup>
+</Project>

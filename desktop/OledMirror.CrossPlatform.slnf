@@ -1,0 +1,10 @@
+{
+  "solution": {
+    "path": "OledMirror.sln",
+    "projects": [
+      "OledMirror.Core\\OledMirror.Core.csproj",
+      "OledMirror.Cli\\OledMirror.Cli.csproj",
+      "OledMirror.Tests\\OledMirror.Tests.csproj"
+    ]
+  }
+}
