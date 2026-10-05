@@ -4,6 +4,7 @@
 
 #include <stdint.h>
 
+#include "config/config.h"
 #include "display/display_driver.h"
 #include "protocol/parser.h"
 #include "protocol/protocol.h"
