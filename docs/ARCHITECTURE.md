@@ -61,7 +61,7 @@
 | `OledMirror.Windows` | `net8.0-windows` | Captura GDI, enumeração de monitores/janelas/portas, ViewModel. **Sem WPF.** |
 | `OledMirror.App` | `net8.0-windows` + WPF | Só XAML e código de janela. |
 | `OledMirror.Cli` | `net8.0` | Prévia, benchmark, simulação, diagnóstico de hardware. |
-| `OledMirror.Tests` | `net8.0` | 124 testes. |
+| `OledMirror.Tests` | `net8.0` | 128 testes. |
 | `firmware/` | ESP32 / Arduino | Firmware modular. |
 
 ### Por que esta divisão

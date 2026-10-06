@@ -3,6 +3,21 @@
 Organizado por sintoma. Cada item diz **como distinguir** as causas possíveis,
 não só o que tentar.
 
+## `dotnet run` diz "No .NET SDKs were found"
+
+O PC tem só o *runtime* do .NET, que roda programas mas não compila. Instale o
+**SDK do .NET 8** (`winget install Microsoft.DotNet.SDK.8`, ou o instalador em
+https://dotnet.microsoft.com/download/dotnet/8.0) e **abra um terminal novo**.
+`dotnet --list-sdks` tem que mostrar uma linha `8.0.xxx`.
+
+## O painel fica em "aguardando o PC"
+
+É a tela de espera do firmware: o ESP32 e o painel estão funcionando (fase 1
+concluída) e ninguém se conectou ainda. Siga para a fase 2 do roteiro
+(`oledmirror device --do info`). Depois de conectado, o painel só volta para essa
+tela se o PC ficar 5 s sem mandar nada — o que indica que a aplicação fechou ou o
+cabo caiu.
+
 ## O painel não acende de jeito nenhum
 
 **Primeiro, separe os dois problemas possíveis.** Rode:

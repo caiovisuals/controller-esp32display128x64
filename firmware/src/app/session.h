@@ -30,6 +30,10 @@ class Session {
         // Envia uma linha de log para o host (aparece no painel de log da aplicacao)
         void SendLog(LogLevel level, const char* message);
 
+        // Informa se o painel respondeu na inicializacao. Sem painel, o HELLO_ACK
+        // anuncia o controlador como desconhecido, que e' como o host diagnostica fiacao
+        void SetPanelDetected(bool detected) { panel_detected_ = detected; }
+
     private:
         void HandlePacket(const ParsedPacket& packet);
         void HandleFrame(const ParsedPacket& packet);
@@ -56,7 +60,8 @@ class Session {
         uint8_t  tx_sequence_ = 0;
         bool     streaming_ = false;
         bool     idle_screen_shown_ = false;
-        uint32_t last_frame_ms_ = 0;
+        bool     panel_detected_ = true;
+        uint32_t last_host_ms_ = 0;
         uint32_t idle_timeout_ms_ = OLEDMIRROR_IDLE_TIMEOUT_MS;
         uint32_t boot_ms_ = 0;
 

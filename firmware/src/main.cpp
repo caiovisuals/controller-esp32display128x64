@@ -24,13 +24,15 @@ namespace {
         return static_cast<oledmirror::ControllerId>(value);
     }
 
+    uint8_t g_probed_address = 0;
+
     uint8_t DetectAddress() {
     #if OLEDMIRROR_BUS_SPI
         return 0;
     #else
-        const uint8_t found = oledmirror::U8g2Display::ProbeI2c();
+        g_probed_address = oledmirror::U8g2Display::ProbeI2c();
         // Nenhum endereco respondeu: segue com o primario para o host ainda conseguir conversar e diagnosticar
-        return found != 0 ? found : OLEDMIRROR_I2C_ADDR_PRIMARY;
+        return g_probed_address != 0 ? g_probed_address : OLEDMIRROR_I2C_ADDR_PRIMARY;
     #endif
     }
 
@@ -45,10 +47,18 @@ void setup() {
     g_display = new oledmirror::U8g2Display(LoadController(), DetectAddress());
     const bool display_ok = g_display->Begin();
 
+    // Em I2C o begin() do U8g2 nao detecta painel ausente; a sondagem detecta
+#if OLEDMIRROR_BUS_SPI
+    const bool panel_found = display_ok;
+#else
+    const bool panel_found = display_ok && g_probed_address != 0;
+#endif
+
     g_session = new oledmirror::Session(g_display, &g_link);
+    g_session->SetPanelDetected(panel_found);
     g_session->Begin();
 
-    if (!display_ok) g_session->SendLog(oledmirror::kLogError, "painel nao respondeu; confira a fiacao");
+    if (!panel_found) g_session->SendLog(oledmirror::kLogError, "painel nao respondeu; confira a fiacao");
 }
 
 void loop() {

@@ -82,7 +82,11 @@ namespace oledmirror {
         if (u8g2_ == nullptr) return false;
 
         if (!u8g2_->begin()) return false;
+    #if OLEDMIRROR_BUS_SPI
+        u8g2_->setBusClock(OLEDMIRROR_SPI_CLOCK);
+    #else
         u8g2_->setBusClock(OLEDMIRROR_I2C_CLOCK);
+    #endif
         u8g2_->setPowerSave(0);
         u8g2_->clearBuffer();
         u8g2_->sendBuffer();

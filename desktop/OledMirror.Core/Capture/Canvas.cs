@@ -1,0 +1,149 @@
+using System.Runtime.InteropServices;
+
+namespace OledMirror.Core.Capture;
+
+/// <summary>Pintura minima sobre um buffer BGRA, usada pelas fontes sinteticas.</summary>
+internal sealed class Canvas
+{
+    public Canvas(int width, int height)
+    {
+        Width = Math.Max(1, width);
+        Height = Math.Max(1, height);
+        Buffer = new byte[Width * Height * 4];
+    }
+
+    public int Width { get; }
+    public int Height { get; }
+    public byte[] Buffer { get; }
+    public int Stride => Width * 4;
+
+    private Span<uint> Pixels => MemoryMarshal.Cast<byte, uint>(Buffer.AsSpan());
+
+    public static uint Rgb(byte r, byte g, byte b) => 0xFF000000u | ((uint)r << 16) | ((uint)g << 8) | b;
+
+    public static uint Gray(byte v) => Rgb(v, v, v);
+
+    public void Clear(uint color) => Pixels.Fill(color);
+
+    public void FillRect(int x, int y, int w, int h, uint color)
+    {
+        int x0 = Math.Max(0, x), y0 = Math.Max(0, y);
+        int x1 = Math.Min(Width, x + w), y1 = Math.Min(Height, y + h);
+        if (x1 <= x0 || y1 <= y0) return;
+
+        Span<uint> pixels = Pixels;
+        for (int row = y0; row < y1; row++) pixels.Slice(row * Width + x0, x1 - x0).Fill(color);
+    }
+
+    public void StrokeRect(int x, int y, int w, int h, int thickness, uint color)
+    {
+        FillRect(x, y, w, thickness, color);
+        FillRect(x, y + h - thickness, w, thickness, color);
+        FillRect(x, y, thickness, h, color);
+        FillRect(x + w - thickness, y, thickness, h, color);
+    }
+
+    public void FillCircle(int cx, int cy, int radius, uint color)
+    {
+        Span<uint> pixels = Pixels;
+        int r2 = radius * radius;
+        for (int dy = -radius; dy <= radius; dy++)
+        {
+            int y = cy + dy;
+            if (y < 0 || y >= Height) continue;
+            int half = (int)Math.Sqrt(r2 - dy * dy);
+            int x0 = Math.Max(0, cx - half), x1 = Math.Min(Width - 1, cx + half);
+            if (x1 >= x0) pixels.Slice(y * Width + x0, x1 - x0 + 1).Fill(color);
+        }
+    }
+
+    public void SetPixel(int x, int y, uint color)
+    {
+        if ((uint)x < (uint)Width && (uint)y < (uint)Height) Pixels[y * Width + x] = color;
+    }
+
+    /// <summary>Texto na fonte 5x7, com cada pixel da fonte virando um quadrado de <paramref name="scale"/>.</summary>
+    public void DrawText(string text, int x, int y, int scale, uint color)
+    {
+        scale = Math.Max(1, scale);
+        foreach (char ch in text)
+        {
+            ReadOnlySpan<byte> glyph = BitmapFont.Glyph(ch);
+            for (int col = 0; col < BitmapFont.GlyphWidth; col++)
+            {
+                byte bits = glyph[col];
+                for (int row = 0; row < BitmapFont.GlyphHeight; row++)
+                    if ((bits & (1 << row)) != 0)
+                        FillRect(x + col * scale, y + row * scale, scale, scale, color);
+            }
+            x += BitmapFont.Advance * scale;
+        }
+    }
+
+    public static int MeasureText(string text, int scale) => Math.Max(0, text.Length * BitmapFont.Advance * scale - scale);
+}
+
+/// <summary>Fonte classica 5x7 (colunas, bit 0 em cima), so maiusculas, digitos e pontuacao basica.</summary>
+internal static class BitmapFont
+{
+    public const int GlyphWidth = 5;
+    public const int GlyphHeight = 7;
+    public const int Advance = 6;
+
+    private const string Chars = " 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ:.-/!?x";
+
+    private static readonly byte[] Data =
+    {
+        0x00,0x00,0x00,0x00,0x00, // ' '
+        0x3E,0x51,0x49,0x45,0x3E, // 0
+        0x00,0x42,0x7F,0x40,0x00, // 1
+        0x42,0x61,0x51,0x49,0x46, // 2
+        0x21,0x41,0x45,0x4B,0x31, // 3
+        0x18,0x14,0x12,0x7F,0x10, // 4
+        0x27,0x45,0x45,0x45,0x39, // 5
+        0x3C,0x4A,0x49,0x49,0x30, // 6
+        0x01,0x71,0x09,0x05,0x03, // 7
+        0x36,0x49,0x49,0x49,0x36, // 8
+        0x06,0x49,0x49,0x29,0x1E, // 9
+        0x7E,0x11,0x11,0x11,0x7E, // A
+        0x7F,0x49,0x49,0x49,0x36, // B
+        0x3E,0x41,0x41,0x41,0x22, // C
+        0x7F,0x41,0x41,0x22,0x1C, // D
+        0x7F,0x49,0x49,0x49,0x41, // E
+        0x7F,0x09,0x09,0x09,0x01, // F
+        0x3E,0x41,0x49,0x49,0x7A, // G
+        0x7F,0x08,0x08,0x08,0x7F, // H
+        0x00,0x41,0x7F,0x41,0x00, // I
+        0x20,0x40,0x41,0x3F,0x01, // J
+        0x7F,0x08,0x14,0x22,0x41, // K
+        0x7F,0x40,0x40,0x40,0x40, // L
+        0x7F,0x02,0x0C,0x02,0x7F, // M
+        0x7F,0x04,0x08,0x10,0x7F, // N
+        0x3E,0x41,0x41,0x41,0x3E, // O
+        0x7F,0x09,0x09,0x09,0x06, // P
+        0x3E,0x41,0x51,0x21,0x5E, // Q
+        0x7F,0x09,0x19,0x29,0x46, // R
+        0x46,0x49,0x49,0x49,0x31, // S
+        0x01,0x01,0x7F,0x01,0x01, // T
+        0x3F,0x40,0x40,0x40,0x3F, // U
+        0x1F,0x20,0x40,0x20,0x1F, // V
+        0x3F,0x40,0x38,0x40,0x3F, // W
+        0x63,0x14,0x08,0x14,0x63, // X
+        0x07,0x08,0x70,0x08,0x07, // Y
+        0x61,0x51,0x49,0x45,0x43, // Z
+        0x00,0x36,0x36,0x00,0x00, // :
+        0x00,0x60,0x60,0x00,0x00, // .
+        0x08,0x08,0x08,0x08,0x08, // -
+        0x20,0x10,0x08,0x04,0x02, // /
+        0x00,0x00,0x5F,0x00,0x00, // !
+        0x02,0x01,0x51,0x09,0x06, // ?
+        0x44,0x28,0x10,0x28,0x44, // x (sinal de vezes)
+    };
+
+    public static ReadOnlySpan<byte> Glyph(char c)
+    {
+        int index = c == 'x' ? Chars.IndexOf('x') : Chars.IndexOf(char.ToUpperInvariant(c));
+        if (index < 0) index = Chars.IndexOf('?');
+        return Data.AsSpan(index * GlyphWidth, GlyphWidth);
+    }
+}

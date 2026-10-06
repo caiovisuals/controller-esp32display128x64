@@ -33,7 +33,7 @@ Session::Session(DisplayDriver* display, LinkTransport* link)
 
     void Session::Begin() {
         boot_ms_ = millis();
-        last_frame_ms_ = boot_ms_;
+        last_host_ms_ = boot_ms_;
         ApplyStoredSettings();
         ShowIdleScreen();
     }
@@ -55,7 +55,7 @@ Session::Session(DisplayDriver* display, LinkTransport* link)
     void Session::ShowIdleScreen() {
         char line[24];
         snprintf(line, sizeof(line), "%s", kDeviceName);
-        display_->ShowMessage("OledMirror", "aguardando o PC", line);
+        display_->ShowMessage(line, "Aguardando o PC");
         idle_screen_shown_ = true;
     }
 
@@ -80,16 +80,19 @@ Session::Session(DisplayDriver* display, LinkTransport* link)
         // 2. Volta para a tela de espera se o host sumiu.
         const uint32_t now = millis();
         if (idle_timeout_ms_ > 0 && !idle_screen_shown_ &&
-            static_cast<uint32_t>(now - last_frame_ms_) > idle_timeout_ms_) {
+            static_cast<uint32_t>(now - last_host_ms_) > idle_timeout_ms_) {
             streaming_ = false;
             ShowIdleScreen();
         }
     }
 
     void Session::HandlePacket(const ParsedPacket& packet) {
+        last_host_ms_ = millis();
+
         switch (packet.command) {
             case kCmdHello:
                 SendHelloAck(kCmdHelloAck);
+                if (!panel_detected_) SendLog(kLogError, "painel nao respondeu; confira a fiacao");
                 break;
 
             case kCmdGetInfo:
@@ -106,7 +109,6 @@ Session::Session(DisplayDriver* display, LinkTransport* link)
 
             case kCmdStreamBegin:
                 streaming_ = true;
-                last_frame_ms_ = millis();
                 SendAck(kCmdStreamBegin);
                 break;
 
@@ -118,7 +120,6 @@ Session::Session(DisplayDriver* display, LinkTransport* link)
             case kCmdClear:
                 display_->Clear();
                 idle_screen_shown_ = false;
-                last_frame_ms_ = millis();
                 SendAck(kCmdClear);
                 break;
 
@@ -157,6 +158,11 @@ Session::Session(DisplayDriver* display, LinkTransport* link)
 
         // Sai da tela de espera na primeira imagem que chegar.
         if (idle_screen_shown_) {
+            if (packet.command == kCmdFrameDelta || packet.command == kCmdFrameDeltaRle) {
+                ++frames_dropped_;
+                SendNack(packet.command, kNackNotStreaming, packet.sequence);
+                return;
+            }
             memset(framebuffer, 0, kFrameBytes);
             idle_screen_shown_ = false;
         }
@@ -176,7 +182,6 @@ Session::Session(DisplayDriver* display, LinkTransport* link)
         last_render_us_ = elapsed > 0xFFFF ? 0xFFFF : static_cast<uint16_t>(elapsed);
 
         ++frames_applied_;
-        last_frame_ms_ = millis();
 
         // FRAME_ACK depois do render: o host mede a latencia real ate a imagem
         // aparecer, e a janela de controle de fluxo reflete o ritmo do painel.
@@ -203,7 +208,6 @@ Session::Session(DisplayDriver* display, LinkTransport* link)
 
         display_->ShowMessage(l1, l2, l3);
         idle_screen_shown_ = false;
-        last_frame_ms_ = millis();
         SendAck(kCmdText);
     }
 
@@ -286,7 +290,7 @@ Session::Session(DisplayDriver* display, LinkTransport* link)
         PutU16(payload + 4, kDeviceCapabilities);
         payload[6] = kDisplayWidth;
         payload[7] = kDisplayHeight;
-        payload[8] = static_cast<uint8_t>(display_->controller());
+        payload[8] = static_cast<uint8_t>(panel_detected_ ? display_->controller() : kControllerUnknown);
         payload[9] = static_cast<uint8_t>(display_->bus());
         payload[10] = display_->i2c_address();
         payload[11] = OLEDMIRROR_RX_QUEUE_DEPTH;

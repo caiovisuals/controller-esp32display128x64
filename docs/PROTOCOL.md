@@ -258,6 +258,19 @@ Ao conectar, o host envia **64 bytes 0x00** seguidos de um `SYNC`. Os zeros
 desalinham qualquer parser preso no meio de um pacote de uma sessão anterior
 (ou no log de boot do ESP32), e o `SYNC` confirma que o canal está limpo.
 
+### Tela de espera e recuperação
+
+O firmware volta para a tela "aguardando o PC" depois de 5 s sem **nenhum pacote
+válido** do host (o PING de keepalive conta; com a tela do PC parada, nenhum frame
+é enviado, mas os PINGs continuam). Enquanto a tela de espera está no painel, um
+`FRAME_DELTA`/`FRAME_DELTA_RLE` é recusado com `NACK 0x07`: o delta se aplicaria
+sobre um conteúdo que o painel não tem mais. O NACK faz o host invalidar o
+codificador e mandar o próximo frame completo.
+
+Se o ESP32 reiniciar com o cabo ligado, o link continua respondendo e o host não
+tem como perceber. Por isso, com a tela parada, o host reenvia **um frame completo
+a cada 3 s** (`MirrorSettings.KeyframeIntervalMs`), e o painel se recupera sozinho.
+
 ### Reconexão
 
 O host detecta a queda por erro de I/O da porta ou por **inatividade** (nenhum

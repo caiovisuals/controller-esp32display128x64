@@ -12,6 +12,9 @@ public static class Program
 {
     public static int Main(string[] args)
     {
+        try { Console.OutputEncoding = System.Text.Encoding.UTF8; }
+        catch (Exception) { /* saida redirecionada ou console sem suporte */ }
+        
         if (args.Length == 0 || args[0] is "-h" or "--help" or "help")
         {
             PrintUsage();

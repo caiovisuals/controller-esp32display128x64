@@ -4,7 +4,7 @@ namespace OledMirror.Tests.Protocol;
 
 /// <summary>
 /// Vetores conhecidos. O firmware tem os mesmos valores em
-/// firmware/test/test_protocol/test_crc.cpp: se as duas pontas divergirem,
+/// firmware/test/test_protocol/test_main.cpp: se as duas pontas divergirem,
 /// nenhum pacote passa e este teste diz de que lado esta o erro.
 /// </summary>
 public class CrcTests {

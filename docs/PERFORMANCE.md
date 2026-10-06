@@ -102,7 +102,7 @@ por quase nada.
 
 **DELTA é o ganho de verdade**, e o ganho segue exatamente quanto da tela mudou:
 
-* tela parada → nada é transmitido;
+* tela parada → nada é transmitido (só um frame completo a cada 3 s — ver abaixo);
 * relógio mudando num canto → **11× menos banda**;
 * cursor se movendo → **3,6×**;
 * janela rolando → 1,3× (quase tudo mudou, delta não tem o que economizar).

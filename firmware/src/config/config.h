@@ -35,6 +35,11 @@
 #define OLEDMIRROR_NATIVE_USB 0
 #endif
 
+// Clock do SPI. O SSD1306 aceita ate 10 MHz; 8 MHz da' ~1 ms por frame
+#ifndef OLEDMIRROR_SPI_CLOCK
+#define OLEDMIRROR_SPI_CLOCK 8000000
+#endif
+
 #ifndef OLEDMIRROR_SPI_CS
 #define OLEDMIRROR_SPI_CS 5
 #endif

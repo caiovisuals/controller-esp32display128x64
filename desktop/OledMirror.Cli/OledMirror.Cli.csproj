@@ -4,6 +4,8 @@
     </ItemGroup>
     <PropertyGroup>
         <OutputType>Exe</OutputType>
+        <AssemblyName>oledmirror</AssemblyName>
+        <RootNamespace>OledMirror.Cli</RootNamespace>
         <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>

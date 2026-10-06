@@ -42,7 +42,7 @@ A redução cai de 15× para 4× e o conteúdo fica legível. A aplicação supo
 | Captura Windows (monitor / janela / região) | pronto, compila |
 | Aplicação WPF | pronta — **ver a ressalva abaixo** |
 | CLI (prévia, benchmark, simulação, diagnóstico) | pronto, em uso |
-| 124 testes em C# + 28 no firmware | passando |
+| 128 testes em C# + 28 no firmware | passando |
 
 ## Comece por aqui
 
@@ -62,8 +62,15 @@ O terceiro mede a compressão.
 ### Com hardware
 
 1. Leia **[docs/HARDWARE.md](docs/HARDWARE.md)** e monte o circuito.
-2. Grave o firmware.
-3. Rode `oledmirror device --do info`.
+2. Grave o firmware. O painel deve mostrar "aguardando o PC".
+3. **Feche o monitor serial** do PlatformIO/Arduino/VS Code — ele segura a porta.
+4. Siga o [roteiro de integração](#roteiro-de-integração) a partir da fase 2:
+
+```bash
+cd desktop
+dotnet run --project OledMirror.Cli -- ports
+dotnet run --project OledMirror.Cli -- device --do info
+```
 
 ## Hardware
 
@@ -146,6 +153,22 @@ As configurações são salvas em
 
 ### Linha de comando
 
+Os exemplos usam `oledmirror` como abreviação. A partir da pasta `desktop`, rode
+assim, sem instalar nada:
+
+```bash
+dotnet run --project OledMirror.Cli -- <comando> [opcoes]
+```
+
+Ou gere um executável e use o nome curto de verdade:
+
+```bash
+dotnet publish OledMirror.Cli -c Release -o publish
+publish\oledmirror ports          # Windows (no Linux: ./publish/oledmirror ports)
+```
+
+Use `--port COM5` no `device` se a porta detectada não for a do ESP32.
+
 ```bash
 oledmirror preview  --pattern Text --dither FloydSteinberg 
 oledmirror bench
@@ -194,7 +217,7 @@ O sistema tem dois tetos independentes, e o menor manda:
 
 | Cenário | Banda vs. frame cru |
 |---|---|
-| tela parada | tráfego ~zero (frames idênticos não são enviados) |
+| tela parada | tráfego ~zero (frames idênticos não são enviados; um frame completo a cada 3 s, para o painel se recuperar sozinho se o ESP32 reiniciar) |
 | região pequena mudando (relógio) | **11× menos** |
 | cursor se movendo | **3,6× menos** |
 | janela rolando | 1,3× menos |
@@ -230,7 +253,7 @@ Ditas de forma direta:
 ## Testes
 
 ```bash
-cd desktop && dotnet test OledMirror.Tests/OledMirror.Tests.csproj   # 124 testes
+cd desktop && dotnet test OledMirror.Tests/OledMirror.Tests.csproj   # 128 testes
 cd firmware && pio test -e native                                    # 28 testes
 ```
 
