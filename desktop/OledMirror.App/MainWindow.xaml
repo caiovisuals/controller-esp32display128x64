@@ -21,7 +21,6 @@
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
         <Border Grid.Row="0" Grid.ColumnSpan="2" Background="{StaticResource Panel}"
-                BorderBrush="{StaticResource Border}" BorderThickness="1"
                 CornerRadius="4" Padding="12,8" Margin="0,0,0,10">
             <StackPanel Orientation="Horizontal">
                 <Ellipse Width="12" Height="12" VerticalAlignment="Center"
@@ -53,7 +52,32 @@
                                 HorizontalAlignment="Left" />
                     </StackPanel>
                 </GroupBox>
-                <GroupBox Header="Fonte">
+                <GroupBox Header="Conteudo">
+                    <StackPanel>
+                        <RadioButton Content="Espelhar a tela" GroupName="ContentMode"
+                                     IsChecked="{Binding IsMirrorMode}" />
+                        <RadioButton Content="Mostrar um texto" GroupName="ContentMode"
+                                     IsChecked="{Binding IsTextMode}" />
+                    </StackPanel>
+                </GroupBox>
+                <GroupBox Header="Texto" Visibility="{Binding IsTextMode, Converter={StaticResource BoolToVisibility}}">
+                    <StackPanel>
+                        <TextBlock Text="Texto do painel (Enter quebra a linha)" Style="{StaticResource Label}" />
+                        <TextBox Text="{Binding DisplayText, UpdateSourceTrigger=PropertyChanged}"
+                                 AcceptsReturn="True" TextWrapping="Wrap" Height="96"
+                                 VerticalScrollBarVisibility="Auto" FontFamily="Consolas" />
+                        <TextBlock Text="{Binding TextInfo}" Foreground="{StaticResource TextDim}"
+                                   TextWrapping="Wrap" Margin="0,4,0,0" />
+                        <TextBlock Text="Tamanho" Style="{StaticResource Label}" Margin="0,8,0,0" />
+                        <ComboBox ItemsSource="{Binding TextScales}" SelectedItem="{Binding SelectedTextScale}" />
+                        <TextBlock Text="Alinhamento" Style="{StaticResource Label}" Margin="0,8,0,0" />
+                        <ComboBox ItemsSource="{Binding TextAligns}" SelectedItem="{Binding TextAlign}" />
+                        <CheckBox Content="Inverter (fundo aceso)" IsChecked="{Binding Invert}" />
+                        <Button Content="Abrir .txt..." Click="OnOpenTextFile" Margin="0,6,0,0"
+                                HorizontalAlignment="Left" />
+                    </StackPanel>
+                </GroupBox>
+                <GroupBox Header="Fonte" Visibility="{Binding IsMirrorMode, Converter={StaticResource BoolToVisibility}}">
                     <StackPanel>
                         <TextBlock Text="Tipo" Style="{StaticResource Label}" />
                         <ComboBox ItemsSource="{Binding SourceKinds}" SelectedItem="{Binding SourceKind}" />
@@ -78,7 +102,7 @@
                                 Margin="0,8,0,0" HorizontalAlignment="Left" />
                     </StackPanel>
                 </GroupBox>
-                <GroupBox Header="Imagem">
+                <GroupBox Header="Imagem" Visibility="{Binding IsMirrorMode, Converter={StaticResource BoolToVisibility}}">
                     <StackPanel>
                         <TextBlock Text="Modo de encaixe" Style="{StaticResource Label}" />
                         <ComboBox ItemsSource="{Binding ResizeModes}" SelectedItem="{Binding ResizeMode}" />
@@ -125,12 +149,12 @@
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
-            <Border Grid.Row="0" Background="{StaticResource Panel}" BorderBrush="{StaticResource Border}"
-                    BorderThickness="1" CornerRadius="4" Padding="16">
+            <Border Grid.Row="0" Background="{StaticResource Panel}"
+                    CornerRadius="4" Padding="16">
                 <StackPanel>
                     <TextBlock Text="PREVIA DO PAINEL (128 x 64)" Style="{StaticResource SectionTitle}"
                                HorizontalAlignment="Center" />
-                    <Border Background="Black" BorderBrush="{StaticResource Border}" BorderThickness="1"
+                    <Border Background="Black"
                             Padding="8" HorizontalAlignment="Center">
                         <Image x:Name="PreviewImage" Width="512" Height="256"
                                RenderOptions.BitmapScalingMode="NearestNeighbor"
@@ -138,8 +162,8 @@
                     </Border>
                 </StackPanel>
             </Border>
-            <Border Grid.Row="1" Background="{StaticResource Panel}" BorderBrush="{StaticResource Border}"
-                    BorderThickness="1" CornerRadius="4" Padding="16" Margin="0,10,0,0">
+            <Border Grid.Row="1" Background="{StaticResource Panel}"
+                    CornerRadius="4" Padding="16" Margin="0,10,0,0">
                 <StackPanel>
                     <TextBlock Text="METRICAS" Style="{StaticResource SectionTitle}" />
                     <Grid>
@@ -183,7 +207,6 @@
             </StackPanel>
         </Grid>
         <Border Grid.Row="2" Grid.ColumnSpan="2" Background="{StaticResource Panel}"
-                BorderBrush="{StaticResource Border}" BorderThickness="1"
                 CornerRadius="4" Padding="8" Margin="0,10,0,0">
             <Grid>
                 <Grid.RowDefinitions>

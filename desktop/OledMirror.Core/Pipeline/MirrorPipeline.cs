@@ -67,6 +67,12 @@ public sealed class MirrorPipeline : IDisposable
         get { lock (_sourceGate) return (_sourceWidth, _sourceHeight); }
     }
 
+    /// <summary>A fonte atual (null se nao houver).</summary>
+    public ICaptureSource? Source
+    {
+        get { lock (_sourceGate) return _source; }
+    }
+
     /// <summary>Um frame novo foi processado. Disparado na thread do pipeline.</summary>
     public event Action? FrameReady;
 

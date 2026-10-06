@@ -63,7 +63,9 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         RefreshPorts();
         RefreshSources();
         ApplySettingsToProperties();
+        UpdateTextInfo();
         _loading = false;
+        RefreshIdlePreview();
 
         _controller.Connect(_settings);
 
@@ -94,6 +96,17 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     public IReadOnlyList<CaptureSourceKind> SourceKinds { get; } =
         new[] { CaptureSourceKind.Monitor, CaptureSourceKind.Window, CaptureSourceKind.Region, CaptureSourceKind.Synthetic };
+
+    public IReadOnlyList<TextScaleOption> TextScales { get; } = new[]
+    {
+        new TextScaleOption(0, "Automatico"),
+        new TextScaleOption(1, "Pequeno (21 colunas, 8 linhas)"),
+        new TextScaleOption(2, "Medio (10 colunas, 4 linhas)"),
+        new TextScaleOption(3, "Grande (7 colunas, 2 linhas)"),
+        new TextScaleOption(4, "Enorme (5 colunas, 2 linhas)"),
+    };
+
+    public IReadOnlyList<TextAlign> TextAligns { get; } = Enum.GetValues<TextAlign>();
 
     public IReadOnlyList<ResizeMode> ResizeModes { get; } = Enum.GetValues<ResizeMode>();
     public IReadOnlyList<DitheringMode> DitheringModes { get; } = Enum.GetValues<DitheringMode>();
@@ -141,6 +154,106 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     {
         get => _settings.AutoReconnect;
         set { if (_settings.AutoReconnect == value) return; _settings.AutoReconnect = value; OnPropertyChanged(); }
+    }
+
+    // ------------------------------------------------------------------ conteudo
+
+    public ContentMode ContentMode
+    {
+        get => _settings.ContentMode;
+        set
+        {
+            if (_settings.ContentMode == value) return;
+            _settings.ContentMode = value;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(IsMirrorMode));
+            OnPropertyChanged(nameof(IsTextMode));
+            if (_loading) return;
+            _controller.UpdateSettings(_settings, sourceChanged: true);
+            RefreshIdlePreview();
+        }
+    }
+
+    /// <summary>Para os RadioButtons: marcar um desmarca o outro.</summary>
+    public bool IsMirrorMode
+    {
+        get => ContentMode == ContentMode.Mirror;
+        set { if (value) ContentMode = ContentMode.Mirror; }
+    }
+
+    public bool IsTextMode
+    {
+        get => ContentMode == ContentMode.Text;
+        set { if (value) ContentMode = ContentMode.Text; }
+    }
+
+    public string DisplayText
+    {
+        get => _settings.DisplayText;
+        set
+        {
+            value ??= string.Empty;
+            if (_settings.DisplayText == value) return;
+            _settings.DisplayText = value;
+            OnPropertyChanged();
+            TextChanged();
+        }
+    }
+
+    public TextScaleOption? SelectedTextScale
+    {
+        get => TextScales.FirstOrDefault(o => o.Value == _settings.TextScale) ?? TextScales[0];
+        set
+        {
+            if (value is null || _settings.TextScale == value.Value) return;
+            _settings.TextScale = value.Value;
+            OnPropertyChanged();
+            TextChanged();
+        }
+    }
+
+    public TextAlign TextAlign
+    {
+        get => _settings.TextAlign;
+        set { if (_settings.TextAlign == value) return; _settings.TextAlign = value; OnPropertyChanged(); TextChanged(); }
+    }
+
+    private string _textInfo = string.Empty;
+    /// <summary>Resumo de como o texto ficou no painel: tamanho, linhas, se rola.</summary>
+    public string TextInfo { get => _textInfo; private set => SetField(ref _textInfo, value); }
+
+    private void TextChanged()
+    {
+        UpdateTextInfo();
+        if (_loading || !IsTextMode) return;
+        _controller.UpdateSettings(_settings, sourceChanged: true);
+        RefreshIdlePreview();
+    }
+
+    private void UpdateTextInfo()
+    {
+        using var source = new TextSource(_settings.ToTextOptions());
+        int lines = source.Lines.Count;
+        TextInfo = lines == 0
+            ? "Texto vazio: o painel fica apagado."
+            : $"Tamanho {source.Scale}, {lines} linha{(lines == 1 ? "" : "s")}" +
+              (source.Scrolls ? " - nao cabe, vai rolar" : string.Empty);
+    }
+
+    /// <summary>
+    /// Com o espelhamento parado, a previa mostra o texto na hora; rodando, quem
+    /// atualiza e' o pipeline. No modo espelho parado, a previa fica apagada.
+    /// </summary>
+    private void RefreshIdlePreview()
+    {
+        if (IsRunning) return;
+
+        lock (_previewFrame)
+        {
+            if (IsTextMode) MirrorController.RenderText(_settings, _previewFrame);
+            else Array.Clear(_previewFrame);
+        }
+        PreviewUpdated?.Invoke();
     }
 
     // ------------------------------------------------------------------ fonte
@@ -252,7 +365,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public bool Invert
     {
         get => _settings.Invert;
-        set { if (_settings.Invert == value) return; _settings.Invert = value; OnPropertyChanged(); PushSettings(); }
+        set { if (_settings.Invert == value) return; _settings.Invert = value; OnPropertyChanged(); PushSettings(); if (!_loading && IsTextMode) RefreshIdlePreview(); }
     }
 
     public bool SkipUnchangedFrames
@@ -400,7 +513,9 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     {
         foreach (string name in new[]
         {
-            nameof(BaudRate), nameof(SimulateDevice), nameof(AutoReconnect), nameof(SourceKind),
+            nameof(BaudRate), nameof(SimulateDevice), nameof(AutoReconnect),
+            nameof(ContentMode), nameof(IsMirrorMode), nameof(IsTextMode),
+            nameof(DisplayText), nameof(SelectedTextScale), nameof(TextAlign), nameof(SourceKind),
             nameof(IsMonitorSource), nameof(IsWindowSource), nameof(IsRegionSource),
             nameof(RegionX), nameof(RegionY), nameof(RegionWidth), nameof(RegionHeight),
             nameof(ResizeMode), nameof(Dithering), nameof(Encoding), nameof(TargetFps),
@@ -497,4 +612,9 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         SaveSettings();
         _controller.Dispose();
     }
+}
+
+public sealed record TextScaleOption(int Value, string Name)
+{
+    public override string ToString() => Name;
 }

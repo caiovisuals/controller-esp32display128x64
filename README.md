@@ -42,7 +42,7 @@ A redução cai de 15× para 4× e o conteúdo fica legível. A aplicação supo
 | Captura Windows (monitor / janela / região) | pronto, compila |
 | Aplicação WPF | pronta — só compila no Windows (ver [Limitações](#limitações), item 7) |
 | CLI (prévia, benchmark, simulação, diagnóstico) | pronto, em uso |
-| 128 testes em C# + 28 no firmware | passando |
+| 142 testes em C# + 28 no firmware | passando |
 
 ## Comece por aqui
 
@@ -53,9 +53,23 @@ cd desktop
 dotnet run --project OledMirror.Cli -- preview --pattern Text
 dotnet run --project OledMirror.Cli -- simulate --seconds 3 --show
 dotnet run --project OledMirror.Cli -- bench
+dotnet run --project OledMirror.Cli -- preview --text "Ola, mundo!\nlinha 2"
 ```
 
 O primeiro mostra no terminal exatamente o que iria para o painel.
+O último mostra o **modo texto** (ver abaixo).
+
+### Modo texto
+
+Em vez de espelhar a tela, o painel pode mostrar um texto qualquer. Na aplicação,
+em **Conteúdo**, escolha **Mostrar um texto**, digite (ou use **Abrir .txt...**) e
+clique em **Iniciar**. A prévia mostra o resultado na hora, mesmo antes de iniciar,
+e edições com o espelhamento rodando vão direto para o painel.
+
+- Quebra de linha automática por palavra; Enter força uma nova linha.
+- Tamanho automático (o maior que couber) ou fixo: 1 = 21 colunas × 8 linhas, até 4.
+- Texto que não cabe nem no menor tamanho rola de baixo para cima.
+- Fonte 5×7 com ASCII completo; letras acentuadas viram a letra base (ã → a, ç → c).
 O segundo roda o pipeline completo — incluindo o protocolo — contra um ESP32 simulado.
 O terceiro mede a compressão.
 
@@ -131,6 +145,11 @@ GPIO 34–39 (só entrada), GPIO 0/2/15 (strapping).
 ```bash
 cd firmware
 pio run -e esp32dev -t upload # ESP32 clássico, I2C a 800 kHz
+```
+
+ou
+```
+python -m platformio run -e esp32dev -t upload
 ```
 
 **No VS Code:** abra a pasta **`firmware`** (Arquivo → Abrir Pasta), não a raiz do

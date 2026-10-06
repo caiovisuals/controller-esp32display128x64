@@ -8,6 +8,14 @@ using OledMirror.Core.Protocol;
 
 namespace OledMirror.Core.Configuration;
 
+/// <summary>O que vai para o painel: a tela espelhada ou um texto do usuario.</summary>
+public enum ContentMode
+{
+    Mirror,
+    Text,
+}
+
+
 /// <summary>Tudo o que a interface salva entre sessoes.</summary>
 public sealed class AppSettings
 {
@@ -17,6 +25,13 @@ public sealed class AppSettings
     public int BaudRate { get; set; } = 921600;
     public bool SimulateDevice { get; set; }
     public bool AutoReconnect { get; set; } = true;
+
+    // Conteudo
+    public ContentMode ContentMode { get; set; } = ContentMode.Mirror;
+    public string DisplayText { get; set; } = "Ola, mundo!";
+    /// <summary>0 = automatico (o maior que couber).</summary>
+    public int TextScale { get; set; }
+    public TextAlign TextAlign { get; set; } = TextAlign.Center;
 
     // Fonte
     public CaptureSourceKind SourceKind { get; set; } = CaptureSourceKind.Monitor;
@@ -49,6 +64,13 @@ public sealed class AppSettings
     public LogLevel LogLevel { get; set; } = LogLevel.Info;
     public bool LogToFile { get; set; } = true;
 
+    public TextOptions ToTextOptions() => new()
+    {
+        Text = DisplayText ?? string.Empty,
+        Scale = TextScale,
+        Align = TextAlign,
+    };
+
     public ImageProcessorOptions ToImageOptions() => new()
     {
         ResizeMode = ResizeMode,
@@ -60,13 +82,22 @@ public sealed class AppSettings
         Invert = Invert,
     };
 
+    public ImageProcessorOptions ToTextImageOptions() => new()
+    {
+        ResizeMode = ResizeMode.Stretch,
+        Dithering = DitheringMode.Threshold,
+        Threshold = 128,
+        AutoContrast = false,
+        Invert = Invert,
+    };
+
     public MirrorSettings ToMirrorSettings() => new()
     {
         TargetFps = TargetFps,
         Encoding = Encoding,
         SkipUnchangedFrames = SkipUnchangedFrames,
         PreviewOnly = PreviewOnly,
-        Image = ToImageOptions(),
+        Image = ContentMode == ContentMode.Text ? ToTextImageOptions() : ToImageOptions(),
     };
 
     /// <summary>Corrige valores fora da faixa (arquivo editado a mao, versao antiga).</summary>
@@ -80,6 +111,8 @@ public sealed class AppSettings
         RegionHeight = Math.Max(16, RegionHeight);
         if (Contrast <= 0 || double.IsNaN(Contrast)) Contrast = 1.0;
         if (Gamma <= 0 || double.IsNaN(Gamma)) Gamma = 1.0;
+        DisplayText ??= string.Empty;
+        TextScale = Math.Clamp(TextScale, 0, TextOptions.MaxScale);
     }
 }
 
