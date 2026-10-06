@@ -530,7 +530,7 @@ public sealed class DeviceLink : IDisposable
     {
         if (packet.Payload.Length == 0) return;
         var level = (DeviceLogLevel)packet.Payload[0];
-        string text = Encoding.UTF8.GetString(packet.Payload, 1, packet.Payload.Length - 1);
+        string text = SanitizeDeviceText(Encoding.UTF8.GetString(packet.Payload, 1, packet.Payload.Length - 1));
 
         switch (level)
         {
@@ -543,6 +543,14 @@ public sealed class DeviceLink : IDisposable
             default: _log.Debug("esp32", text); break;
         }
         Raise(() => DeviceLog?.Invoke(level, text));
+    }
+
+    internal static string SanitizeDeviceText(string text)
+    {
+        if (!text.Any(char.IsControl)) return text;
+        var builder = new StringBuilder(text.Length);
+        foreach (char c in text) builder.Append(char.IsControl(c) ? ' ' : c);
+        return builder.ToString();
     }
 
     private void HandleFrameAck(byte sequence)

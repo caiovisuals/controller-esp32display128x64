@@ -69,6 +69,11 @@ class Session {
         uint32_t frames_dropped_ = 0;
         uint16_t last_render_us_ = 0;
         uint8_t  contrast_ = 0x7F;
+        uint8_t  contrast_saved_ = 0x7F;
+        bool     contrast_dirty_ = false;
+        uint32_t contrast_changed_ms_ = 0;
+
+        static constexpr uint32_t kContrastPersistDelayMs = 1000;
     };
 }
 

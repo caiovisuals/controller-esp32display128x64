@@ -4,7 +4,7 @@
         xmlns:local="clr-namespace:OledMirror.App"
         Title="OledMirror - espelhamento de tela em OLED 128x64"
         Height="760" Width="1080" MinHeight="620" MinWidth="920"
-        Background="{StaticResource Bg}"
+        Background="{StaticResource Bg}" Foreground="{StaticResource Text}"
         FontFamily="Segoe UI" FontSize="13">
     <Window.Resources>
         <local:BoolToVisibilityConverter x:Key="BoolToVisibility" />

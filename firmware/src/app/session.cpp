@@ -43,6 +43,7 @@ Session::Session(DisplayDriver* display, LinkTransport* link)
             contrast_ = g_prefs.getUChar("contrast", contrast_);
             g_prefs.end();
         }
+        contrast_saved_ = contrast_;
         display_->SetContrast(contrast_);
     }
 
@@ -77,9 +78,23 @@ Session::Session(DisplayDriver* display, LinkTransport* link)
             }
         }
 
-        // 2. Volta para a tela de espera se o host sumiu.
         const uint32_t now = millis();
-        if (idle_timeout_ms_ > 0 && !idle_screen_shown_ &&
+        // 2. Grava o contraste na NVS so depois de o valor parar de mudar: um slider
+        //    arrastado no PC manda dezenas de SET_CONFIG, e cada gravacao gasta flash
+        //    e bloqueia o loop por alguns milissegundos.
+        if (contrast_dirty_ && static_cast<uint32_t>(now - contrast_changed_ms_) > kContrastPersistDelayMs) {
+            contrast_dirty_ = false;
+            if (contrast_ != contrast_saved_ && g_prefs.begin(kPrefsNamespace, false)) {
+                g_prefs.putUChar("contrast", contrast_);
+                g_prefs.end();
+                contrast_saved_ = contrast_;
+            }
+        }
+
+        // 3. Volta para a tela de espera se o host sumiu no meio de um espelhamento.
+        //    Fora do streaming (texto, padrao de teste, painel limpo) o conteudo fica
+        //    ate o proximo comando: e' o que se espera de um teste manual.
+        if (streaming_ && idle_timeout_ms_ > 0 && !idle_screen_shown_ &&
             static_cast<uint32_t>(now - last_host_ms_) > idle_timeout_ms_) {
             streaming_ = false;
             ShowIdleScreen();
@@ -113,6 +128,7 @@ Session::Session(DisplayDriver* display, LinkTransport* link)
                 break;
 
             case kCmdStreamEnd:
+                if (streaming_) ShowIdleScreen();
                 streaming_ = false;
                 SendAck(kCmdStreamEnd);
                 break;
@@ -229,10 +245,8 @@ Session::Session(DisplayDriver* display, LinkTransport* link)
                     if (length >= 1) {
                         contrast_ = value[0];
                         display_->SetContrast(contrast_);
-                        if (g_prefs.begin(kPrefsNamespace, false)) {
-                            g_prefs.putUChar("contrast", contrast_);
-                            g_prefs.end();
-                        }
+                        contrast_dirty_ = true;
+                        contrast_changed_ms_ = millis();
                     } else ok = false;
                     break;
 
@@ -257,7 +271,7 @@ Session::Session(DisplayDriver* display, LinkTransport* link)
                     break;
 
                 case kCfgController:
-                    if (length >= 1 && value[0] <= kControllerSh1107) {
+                    if (length >= 1 && value[0] >= kControllerSsd1306 && value[0] <= kControllerSh1107) {
                         // Fica gravado e vale a partir do proximo boot: trocar o
                         // objeto do U8g2 com um frame em voo daria tela corrompida.
                         PersistController(static_cast<ControllerId>(value[0]));

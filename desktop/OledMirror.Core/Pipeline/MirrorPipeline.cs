@@ -143,7 +143,13 @@ public sealed class MirrorPipeline : IDisposable
         SetSource(null);
     }
 
-    private void OnFrameLost() => _invalidate = true;
+    private void OnFrameLost()
+    {
+        _invalidate = true;
+        // Um frame recusado pode significar que o ESP32 reiniciou ou voltou para a
+        // tela de espera e saiu do modo streaming; o STREAM_BEGIN e' barato e idempotente.
+        _streamBeginPending = true;
+    }
 
     private void OnDeviceIdentified(DeviceHello device)
     {
