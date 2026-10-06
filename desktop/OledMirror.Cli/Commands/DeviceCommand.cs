@@ -85,8 +85,7 @@ internal static class DeviceCommand
                 source.TryCapture(out CapturedFrame captured);
                 processor.Process(captured, frame);
 
-                link.SendStreamBegin();
-                Thread.Sleep(50);
+                // Sem STREAM_BEGIN de proposito: fora do modo streaming o firmware mantem a imagem no painel em vez de voltar a tela de espera.
                 bool sent = link.TrySendFrame(CommandId.FrameRaw, frame);
                 Console.WriteLine(sent ? $"Padrao {pattern} enviado." : "Falha ao enviar o frame.");
                 Console.WriteLine(MonoFrameUtils.ToHalfBlocks(frame));

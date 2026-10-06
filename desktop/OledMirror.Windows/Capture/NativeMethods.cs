@@ -103,6 +103,9 @@ internal static class NativeMethods
 
     [DllImport("user32.dll")]
     public static extern IntPtr GetForegroundWindow();
+    
+    /// <summary>PW_CLIENTONLY: so a area cliente, sem barra de titulo e bordas.</summary>
+    public const int PW_CLIENTONLY = 0x00000001;
 
     /// <summary>PW_RENDERFULLCONTENT: captura janelas aceleradas por GPU.</summary>
     public const int PW_RENDERFULLCONTENT = 0x00000002;

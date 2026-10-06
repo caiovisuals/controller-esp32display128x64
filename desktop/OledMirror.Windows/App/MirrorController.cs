@@ -231,7 +231,7 @@ public sealed class MirrorController : IDisposable
         source.TryCapture(out CapturedFrame captured);
         processor.Process(captured, frame);
 
-        _link.SendStreamBegin();
+        // Sem STREAM_BEGIN: assim o padrao fica no painel ate o proximo comando, em vez de o firmware voltar a tela de espera depois do timeout.
         if (_link.TrySendFrame(CommandId.FrameRaw, frame))
             _log.Info(Cat, $"Padrao de teste enviado: {pattern}");
         else

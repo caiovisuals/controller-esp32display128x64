@@ -62,7 +62,8 @@ public sealed class WindowCapture : ICaptureSource
 
         if (!_printWindowFailed)
         {
-            captured = NativeMethods.PrintWindow(_handle, _surface.MemoryDc, NativeMethods.PW_RENDERFULLCONTENT);
+            captured = NativeMethods.PrintWindow(_handle, _surface.MemoryDc,
+                                                NativeMethods.PW_CLIENTONLY | NativeMethods.PW_RENDERFULLCONTENT);
             // Uma falha e' definitiva para esta janela: nao vale tentar de novo a
             // cada frame, o custo e' alto e o resultado nao muda.
             if (!captured) _printWindowFailed = true;

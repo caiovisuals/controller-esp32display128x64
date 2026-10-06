@@ -94,9 +94,10 @@ Session::Session(DisplayDriver* display, LinkTransport* link)
         // 3. Volta para a tela de espera se o host sumiu no meio de um espelhamento.
         //    Fora do streaming (texto, padrao de teste, painel limpo) o conteudo fica
         //    ate o proximo comando: e' o que se espera de um teste manual.
+        //    streaming_ continua ligado: se o host voltar a mandar frames sem um
+        //    novo STREAM_BEGIN, o timeout precisa continuar valendo.
         if (streaming_ && idle_timeout_ms_ > 0 && !idle_screen_shown_ &&
             static_cast<uint32_t>(now - last_host_ms_) > idle_timeout_ms_) {
-            streaming_ = false;
             ShowIdleScreen();
         }
     }

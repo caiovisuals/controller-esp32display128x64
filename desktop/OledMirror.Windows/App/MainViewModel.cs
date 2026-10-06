@@ -357,8 +357,17 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     {
         IReadOnlyList<SerialPortDescriptor> ports = _controller.ScanPorts();
 
-        Ports.Clear();
-        foreach (SerialPortDescriptor port in ports) Ports.Add(port);
+        bool wasLoading = _loading;
+        _loading = true;
+        try
+        {
+            Ports.Clear();
+            foreach (SerialPortDescriptor port in ports) Ports.Add(port);
+        }
+        finally
+        {
+            _loading = wasLoading;
+        }
 
         _selectedPort = ports.FirstOrDefault(p => string.Equals(p.PortName, _settings.PortName, StringComparison.OrdinalIgnoreCase))
                      ?? ports.FirstOrDefault(p => p.LooksLikeEsp32)

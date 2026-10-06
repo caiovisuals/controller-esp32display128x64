@@ -40,7 +40,7 @@ A redução cai de 15× para 4× e o conteúdo fica legível. A aplicação supo
 | Codificação RAW / RLE / DELTA / Auto | pronto, testado e **medido** |
 | Firmware ESP32 modular | pronto, testes unitários passando |
 | Captura Windows (monitor / janela / região) | pronto, compila |
-| Aplicação WPF | pronta — **ver a ressalva abaixo** |
+| Aplicação WPF | pronta — só compila no Windows (ver [Limitações](#limitações), item 7) |
 | CLI (prévia, benchmark, simulação, diagnóstico) | pronto, em uso |
 | 128 testes em C# + 28 no firmware | passando |
 
@@ -71,6 +71,27 @@ cd desktop
 dotnet run --project OledMirror.Cli -- ports
 dotnet run --project OledMirror.Cli -- device --do info
 ```
+
+### Testar o hardware sem o .NET (Python)
+
+Se o Windows bloquear o executável compilado ("Uma política de Controle de
+Aplicativo bloqueou este arquivo" — é o Smart App Control), as fases 2 a 4 podem
+ser feitas com o cliente em Python, que só precisa do `pyserial`:
+
+```bash
+pip install pyserial
+python tools/oledmirror_test.py ports
+python tools/oledmirror_test.py info
+python tools/oledmirror_test.py text "OLA MUNDO"
+python tools/oledmirror_test.py pattern checkerboard   # border, stripes, lines, gradient, white, black
+python tools/oledmirror_test.py stats
+python tools/oledmirror_test.py contrast 200
+python tools/oledmirror_test.py controller sh1106      # se a imagem sair deslocada 2 px
+python tools/oledmirror_test.py selftest               # confere o protocolo, sem placa
+```
+
+Use `--port COM5` se a porta detectada não for a do ESP32. O espelhamento de tela
+em si continua sendo feito pela aplicação em .NET.
 
 ## Hardware
 
@@ -111,6 +132,11 @@ GPIO 34–39 (só entrada), GPIO 0/2/15 (strapping).
 cd firmware
 pio run -e esp32dev -t upload # ESP32 clássico, I2C a 800 kHz
 ```
+
+**No VS Code:** abra a pasta **`firmware`** (Arquivo → Abrir Pasta), não a raiz do
+repositório — a extensão do PlatformIO só reconhece o projeto quando o
+`platformio.ini` está na raiz do workspace. Depois use a barra inferior: compila, grava.
+Se a gravação travar em "Connecting...", segure o botão **BOOT** da placa até começar a gravar.
 
 Outros ambientes:
 
@@ -236,7 +262,8 @@ Ditas de forma direta:
 4. **O controlador do painel não está confirmado.** SSD1306 é o palpite; se a imagem sair deslocada 2 px, é SH1106 — trocável sem regravar (`SET_CONFIG`).
 5. **Captura de janela pode sair preta** em janelas que não respondem a `PrintWindow`. Use o modo região.
 6. **Painéis de duas cores** (faixa amarela no topo) cortam uma faixa da imagem.
-7. **O projeto WPF não foi compilado** neste ambiente — ver a ressalva acima.
+7. **A interface gráfica (WPF) só compila e roda no Windows.** Fora dele, use o filtro
+`OledMirror.CrossPlatform.slnf` (núcleo, CLI e testes).
 8. **I2C a 800 kHz está fora da especificação** do SSD1306. Funciona na maioria dos módulos; se não funcionar no seu, use `esp32dev-i2c400`.
 
 

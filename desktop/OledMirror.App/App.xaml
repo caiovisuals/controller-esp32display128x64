@@ -11,6 +11,9 @@
         <SolidColorBrush x:Key="Accent"   Color="#4C9AFF" />
         <SolidColorBrush x:Key="Ok"       Color="#3FB950" />
         <SolidColorBrush x:Key="Off"      Color="#6E7681" />
+        <SolidColorBrush x:Key="Input"    Color="#1E1F22" />
+        <SolidColorBrush x:Key="Hover"    Color="#35373C" />
+        <SolidColorBrush x:Key="Selected" Color="#2F4A6E" />
         <Style TargetType="TextBlock">
             <Setter Property="Foreground" Value="{StaticResource Text}" />
             <Setter Property="VerticalAlignment" Value="Center" />
