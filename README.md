@@ -347,4 +347,5 @@ The panel has **8,192**, and each one can only be on or off. Mirroring discards 
 **For a truly useful result:** mirror a **region** (e.g., 512×256) or a **small window** instead of the entire monitor.
 The downscaling factor drops from 15× to 4×, making the content legible. The application supports all three modes for this reason.
 
-by caiothevisual
+by caiothedev<br/>
+#esp32 #display #csharp #controller #text-mirror
