@@ -3,6 +3,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Threading;
 using OledMirror.Core.Imaging;
 using OledMirror.Windows.App;
 
@@ -19,6 +20,7 @@ public partial class MainWindow : Window
     private readonly MainViewModel _viewModel;
     private readonly WriteableBitmap _preview;
     private readonly byte[] _previewPixels = new byte[DisplayGeometry.PixelCount];
+    private bool _logScrollPending;
 
     public MainWindow()
     {
@@ -87,7 +89,17 @@ public partial class MainWindow : Window
 
     private void OnLogEntriesChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
-        if (e.Action != NotifyCollectionChangedAction.Add) return;
-        if (LogList.Items.Count > 0) LogList.ScrollIntoView(LogList.Items[^1]);
+        if (e.Action != NotifyCollectionChangedAction.Add || _logScrollPending) return;
+
+        // Nao rolar dentro do proprio CollectionChanged: este handler pode rodar
+        // antes de o ListBox processar o mesmo evento, e o ScrollIntoView forca um
+        // layout com o gerador de itens desatualizado ("ItemsControl inconsistente").
+        // Adiado, roda depois de todos os handlers, uma vez por rajada de linhas.
+        _logScrollPending = true;
+        Dispatcher.BeginInvoke(DispatcherPriority.Background, () =>
+        {
+            _logScrollPending = false;
+            if (LogList.Items.Count > 0) LogList.ScrollIntoView(LogList.Items[^1]);
+        });
     }
 }
